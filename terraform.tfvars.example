@@ -1,0 +1,17 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# terraform.tfvars is git-ignored — never commit it.
+
+proxmox_api_url      = "https://192.168.1.10:8006/api2/json"
+proxmox_token_id     = "terraform@pam!mytoken"
+proxmox_token_secret = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+proxmox_node    = "pve"
+template_name   = "ubuntu-22.04-cloud"
+storage         = "local-lvm"
+network_bridge  = "vmbr0"
+gateway         = "192.168.1.1"
+dns             = "1.1.1.1 8.8.8.8"
+ssh_user        = "ubuntu"
+
+ssh_public_key       = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA... you@machine"
+ssh_private_key_path = "~/.ssh/id_ed25519"
