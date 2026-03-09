@@ -2,10 +2,11 @@
 # Uncomment to create. Change vm_id and ip_address to unique values.
 
 module "ubuntu" {
+  vm_count = 2
   source = "./modules/ubuntu-vm"
-
-  vm_name       = "ubuntu"
-  vm_id         = 201
+  vm_name     = "ubuntu"
+  vm_start_id = 201
+  template_id = 100
   proxmox_node  = var.proxmox_node
   template_name = var.template_name
 

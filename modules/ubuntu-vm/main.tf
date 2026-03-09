@@ -1,8 +1,9 @@
 resource "proxmox_vm_qemu" "this" {
-  name        = var.vm_name
+  count       = var.vm_count
   description = var.vm_desc
   target_node = var.proxmox_node
-  vmid        = var.vm_id
+  vmid   = var.vm_start_id + count.index    
+  name   = "${var.vm_name}-${count.index+1}"  
   clone       = var.template_name
   full_clone  = true
 
