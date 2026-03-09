@@ -1,33 +1,46 @@
+#!/bin/bash
+# Script to create Ubuntu Cloud-Init template in Proxmox
+# Run this on your Proxmox host as root
+
 TEMPLATE_ID=9000
+TEMPLATE_NAME="ubuntu-cloud-template"
 STORAGE="local-lvm"
 BRIDGE="vmbr0"
-IMAGE_URL="https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img"
-IMAGE_FILE="/tmp/ubuntu-22.04-cloud.img"
+SSH_KEY="$HOME/.ssh/id_rsa.pub"
+MEMORY=2048
+CORES=2
 
-# Install tools
-apt-get install -y --no-install-recommends libguestfs-tools wget
+# 1. Download latest Ubuntu Jammy Cloud image
+echo "Downloading Ubuntu Cloud Image..."
+IMG_URL="https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img"
+IMG_FILE="/var/lib/vz/template/qemu/jammy-cloud.img"
+wget -O "$IMG_FILE" "$IMG_URL"
 
-# Download image
-wget -q --show-progress -O "$IMAGE_FILE" "$IMAGE_URL"
+# 2. Create empty VM
+echo "Creating VM $TEMPLATE_ID..."
+qm create $TEMPLATE_ID --name $TEMPLATE_NAME --memory $MEMORY --cores $CORES --net0 virtio,bridge=$BRIDGE
 
-# Inject guest agent
-virt-customize -a "$IMAGE_FILE" \
-  --install qemu-guest-agent \
-  --run-command "systemctl enable qemu-guest-agent" \
-  --run-command "apt-get clean" \
-  --truncate /etc/machine-id
+# 3. Import disk into Proxmox storage
+echo "Importing disk..."
+qm importdisk $TEMPLATE_ID "$IMG_FILE" $STORAGE
 
-# Create VM
-qm create $TEMPLATE_ID --name "ubuntu-22.04-cloud" --memory 2048 --cores 2 --net0 virtio,bridge=$BRIDGE --ostype l26 --machine q35 --scsihw virtio-scsi-single --agent enabled=1
+# 4. Attach imported disk as SCSI
+qm set $TEMPLATE_ID --scsihw virtio-scsi-pci --scsi0 $STORAGE:vm-$TEMPLATE_ID-disk-0
 
-# Import disk
-qm importdisk $TEMPLATE_ID "$IMAGE_FILE" $STORAGE
-qm set $TEMPLATE_ID --scsi0 $STORAGE:vm-${TEMPLATE_ID}-disk-1,discard=on,iothread=1
+# 5. Add Cloud-Init disk
 qm set $TEMPLATE_ID --ide2 $STORAGE:cloudinit
-qm set $TEMPLATE_ID --boot c --bootdisk scsi0
-qm set $TEMPLATE_ID --serial0 socket --vga serial0
 
-# Convert to template
+# 6. Enable QEMU Guest Agent
+qm set $TEMPLATE_ID --agent enabled=1
+
+# 7. Set default user and SSH key
+qm set $TEMPLATE_ID --ciuser ubuntu --sshkey "$(cat $SSH_KEY)"
+
+# 8. Optional: set boot order to SCSI disk first
+qm set $TEMPLATE_ID --boot c --bootdisk scsi0
+
+# 9. Convert VM to template
 qm template $TEMPLATE_ID
 
-echo "Done!"
+echo "✅ Ubuntu Cloud-Init template created!"
+echo "VM ID: $TEMPLATE_ID, Name: $TEMPLATE_NAME"
