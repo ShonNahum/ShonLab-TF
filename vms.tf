@@ -11,7 +11,7 @@ module "k3s" {
   source = "./modules/k3s-vm"
 
   vm_name      = "k3s"
-  vm_id        = 200
+  vm_id        = 202
   proxmox_node = var.proxmox_node
   template_name = var.template_name
 
@@ -21,7 +21,7 @@ module "k3s" {
   storage   = var.storage
 
   network_bridge = var.network_bridge
-  ip_address     = "192.168.1.50/24"
+  ip_address     = var.ip_address
   gateway        = var.gateway
   dns            = var.dns
 

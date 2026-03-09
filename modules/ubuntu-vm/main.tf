@@ -1,27 +1,30 @@
 resource "proxmox_vm_qemu" "this" {
   name        = var.vm_name
-  desc        = var.vm_desc
+  description = var.vm_desc
   target_node = var.proxmox_node
   vmid        = var.vm_id
   clone       = var.template_name
   full_clone  = true
 
-  cores   = var.cpu_cores
+  cpu {
+    cores = var.cpu_cores
+  }
   memory  = var.memory_mb
   scsihw  = "virtio-scsi-pci"
   machine = "q35"
   agent   = 1
 
   disk {
-    slot     = 0
-    type     = "scsi"
+    slot     = "scsi0"
+    type     = "disk"
     storage  = var.storage
     size     = var.disk_size
-    iothread = 1
-    discard  = "on"
+    iothread = true
+    discard  = true
   }
 
   network {
+    id     = 0
     model  = "virtio"
     bridge = var.network_bridge
   }
@@ -32,10 +35,9 @@ resource "proxmox_vm_qemu" "this" {
   ciuser     = var.ssh_user
   sshkeys    = var.ssh_public_key
 
-  onboot   = true
-  vm_state = "running"
+  start_at_node_boot = true
 
   lifecycle {
-    ignore_changes = [network, desc]
+    ignore_changes = [network, description]
   }
 }

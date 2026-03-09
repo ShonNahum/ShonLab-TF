@@ -14,7 +14,7 @@ proxmox-tf/
 ├── variables.tf              ← shared settings (node, storage, bridge, SSH key)
 ├── provider.tf               ← Proxmox API connection
 ├── versions.tf               ← Terraform + provider version locks
-├── terraform.tfvars.example  ← copy to terraform.tfvars and fill in
+├── terraform.tfvars.example  ← copy to terraform.tfvars and fill in (the rael terraform.tfvars i dont commit it.)
 │
 ├── modules/
 │   ├── ubuntu-vm/            ← plain Ubuntu VM
@@ -41,7 +41,7 @@ this template once on your Proxmox server.
 **SSH into your Proxmox server and run:**
 
 ```bash
-bash <(curl -s https://raw.githubusercontent.com/you/proxmox-tf/main/setup/create-template.sh)
+bash <(curl -s https://raw.githubusercontent.com/ShonNahum/ShonLab-TF/main/setup/create-template.sh)
 ```
 
 Or copy the script manually:
@@ -204,3 +204,27 @@ Then just run `terraform apply` — no `terraform.tfvars` needed at all.
 The naming rule is simple:
 ```
 variable "proxmox_token_secret"  →  TF_VAR_proxmox_token_secret
+
+
+## ARCITCTURE
+Your PC (terraform apply)
+         │
+         │  reads
+         ├──────────► terraform.tfvars        (your credentials + defaults)
+         │
+         │  reads
+         ├──────────► vms.tf                  (which VMs you want)
+         │                │
+         │                │ calls
+         │                ├──────► modules/k3s-vm/      (for K3s VMs)
+         │                │              │
+         │                │              │ calls
+         │                │              └──────► modules/ubuntu-vm/   (creates the actual VM)
+         │                │                              │
+         │                └──────► modules/ubuntu-vm/   (for plain Ubuntu VMs)
+         │                                       │
+         │                         Proxmox API   │
+         │                         ◄─────────────┘
+         │
+         │  after VM is created (K3s only)
+         └──────────► SSH into VM → installs K3s → waits until Ready

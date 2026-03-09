@@ -42,6 +42,10 @@ variable "network_bridge" {
   default     = "vmbr0"
 }
 
+variable "ip_address" {
+  type    = string
+  default = "dhcp"
+}
 variable "gateway" {
   description = "Your network gateway (router IP)"
   type        = string
