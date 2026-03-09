@@ -22,7 +22,7 @@ proxmox-tf/
 │   │   ├── variables.tf
 │   │   └── outputs.tf
 │   │
-│   └── k3s-vm/               ← K3s VM (wraps ubuntu-vm + installs K3s)
+│   └── ADD-vm/               ←  VM 
 │       ├── main.tf
 │       ├── variables.tf
 │       └── outputs.tf
@@ -135,16 +135,6 @@ module "my_server" {
 }
 ```
 
-**Another K3s node:**
-```hcl
-module "k3s_2" {
-  source = "./modules/k3s-vm"
-
-  vm_name  = "k3s-2"
-  vm_id    = 203
-  # ... same pattern, different ip_address
-}
-```
 
 Then:
 ```bash
@@ -154,22 +144,6 @@ terraform apply   # only the new VM is created — existing VMs untouched
 **To delete a VM:** comment out or delete its block, then `terraform apply`.
 
 ---
-
-## After Deploy
-
-```bash
-# SSH into K3s node
-ssh ubuntu@$(terraform output -raw k3s_ip)
-
-# Get kubeconfig
-$(terraform output -raw k3s_kubeconfig) > ~/.kube/k3s.yaml
-sed -i 's/127.0.0.1/'"$(terraform output -raw k3s_ip)"'/g' ~/.kube/k3s.yaml
-export KUBECONFIG=~/.kube/k3s.yaml
-kubectl get nodes
-```
-
----
-
 ## Useful Commands
 
 ```bash
@@ -216,15 +190,14 @@ Your PC (terraform apply)
          ├──────────► vms.tf                  (which VMs you want)
          │                │
          │                │ calls
-         │                ├──────► modules/k3s-vm/      (for K3s VMs)
-         │                │              │
-         │                │              │ calls
-         │                │              └──────► modules/ubuntu-vm/   (creates the actual VM)
-         │                │                              │
-         │                └──────► modules/ubuntu-vm/   (for plain Ubuntu VMs)
+         │                ├──────► modules/ADD-vm/      (for ADD VMs)
+         │                                       │
+         │                         Proxmox API   │
+         │                         ◄─────────────┘
+         │                └──────► modules/ubuntu-vm/   
          │                                       │
          │                         Proxmox API   │
          │                         ◄─────────────┘
          │
-         │  after VM is created (K3s only)
-         └──────────► SSH into VM → installs K3s → waits until Ready
+         │  after VM is created 
+         └──────────► SSH into VM 

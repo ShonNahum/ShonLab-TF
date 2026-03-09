@@ -10,7 +10,7 @@ resource "proxmox_vm_qemu" "this" {
     cores = var.cpu_cores
   }
   memory  = var.memory_mb
-  scsihw  = "virtio-scsi-pci"
+  scsihw  = "virtio-scsi-single"
   machine = "q35"
   agent   = 1
 
@@ -28,7 +28,12 @@ resource "proxmox_vm_qemu" "this" {
     model  = "virtio"
     bridge = var.network_bridge
   }
-
+  
+  disk {
+  slot    = "ide2"
+  type    = "cloudinit"
+  storage = var.storage
+  }
   os_type    = "cloud-init"
   ipconfig0  = var.ip_address == "dhcp" ? "ip=dhcp" : "ip=${var.ip_address},gw=${var.gateway}"
   nameserver = var.dns
