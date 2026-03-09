@@ -10,7 +10,8 @@ resource "proxmox_vm_qemu" "this" {
     cores = var.cpu_cores
   }
   memory  = var.memory_mb
-  scsihw  = "virtio-scsi-single"
+  boot = "c"
+  scsihw = "virtio-scsi-pci"
   machine = "q35"
   agent   = 1
 
