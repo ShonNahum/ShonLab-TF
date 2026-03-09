@@ -9,7 +9,7 @@ BRIDGE="vmbr0"
 SSH_KEY="$HOME/.ssh/id_rsa.pub"
 MEMORY=2048
 CORES=2
-
+mkdir -p /var/lib/vz/template/qemu
 # 1. Download latest Ubuntu Jammy Cloud image
 echo "Downloading Ubuntu Cloud Image..."
 IMG_URL="https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img"
