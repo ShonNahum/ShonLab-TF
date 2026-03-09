@@ -3,7 +3,7 @@
 # Run this on your Proxmox host as root
 
 TEMPLATE_ID=9000
-TEMPLATE_NAME="ubuntu-cloud-template"
+TEMPLATE_NAME="ubuntu-template" # make sure to run inside cloud-init & install qemu-guest-agent if u have problems with it
 STORAGE="local-lvm"
 BRIDGE="vmbr0"
 SSH_KEY="$HOME/.ssh/id_rsa.pub"
