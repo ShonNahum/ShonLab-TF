@@ -4,6 +4,12 @@
 
 TEMPLATE_ID=9000
 TEMPLATE_NAME="ubuntu-template" # make sure to run inside cloud-init & install qemu-guest-agent if u have problems with it
+# Imoprtant after running clout-init init
+#sudo cloud-init clean
+#sudo truncate -s 0 /etc/machine-id
+#sudo rm /var/lib/dbus/machine-id
+#sudo rm -f /var/lib/dhcp/*
+#and after it only make it convert it back to template
 STORAGE="local-lvm"
 BRIDGE="vmbr0"
 SSH_KEY="$HOME/.ssh/id_rsa.pub"
